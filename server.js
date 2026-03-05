@@ -11,27 +11,44 @@ const API_KEY = process.env.API_KEY
 
 app.post("/chat", async (req, res) => {
 
-    const msg = req.body.message
+    try {
 
-    const response = await fetch("https://api.apifreellm.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "user", content: msg }
-            ]
+        const msg = req.body.message
+
+        const response = await fetch("https://api.apifreellm.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "user", content: msg }
+                ]
+            })
         })
-    })
 
-    const data = await response.json()
+        const data = await response.json()
 
-    res.json({
-        reply: data.choices[0].message.content
-    })
+        console.log(data) // log pra debug
+
+        if (!data.choices) {
+            return res.json({ reply: "Erro na API." })
+        }
+
+        res.json({
+            reply: data.choices[0].message.content
+        })
+
+    } catch (err) {
+
+        console.error("Erro:", err)
+
+        res.json({
+            reply: "Erro ao falar com a IA."
+        })
+    }
 })
 
 const PORT = process.env.PORT || 3000
